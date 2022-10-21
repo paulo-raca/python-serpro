@@ -6,7 +6,7 @@ import threading
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from time import perf_counter_ns
-from typing import Dict, Generic, Optional, TypeVar, Union
+from typing import Dict, Generic, Optional, TypeVar, Union, overload
 
 import attr
 import httpx
@@ -126,17 +126,51 @@ class SerproAuth(Generic[AuthenticatedClient]):
 
 
 class AuthApiMixin:
+    @overload
     def __init__(
         self,
         base_url: str,
-        consumer_key: str,
-        consumer_secret: str,
         *,
+        token: str,
         cookies: Dict[str, str] = {},
         headers: Dict[str, str] = {},
         timeout: float = 5,
         verify_ssl: Union[str, bool, ssl.SSLContext] = True,
     ):
+        ...
+
+    @overload
+    def __init__(
+        self,
+        base_url: str,
+        *,
+        consumer_key: str = None,
+        consumer_secret: str = None,
+        cookies: Dict[str, str] = {},
+        headers: Dict[str, str] = {},
+        timeout: float = 5,
+        verify_ssl: Union[str, bool, ssl.SSLContext] = True,
+    ):
+        ...
+
+    def __init__(
+        self,
+        base_url: str,
+        *,
+        token: Optional[str] = None,
+        consumer_key: Optional[str] = None,
+        consumer_secret: Optional[str] = None,
+        **kwargs,
+    ):
+        assert (consumer_key is None) == (consumer_secret is None), "Must use both consumer_key and consumer_secret"
+        assert (token is not None) != (
+            consumer_key is not None
+        ), "Must use either token or consumer_key/consumer_secret"
+        if token is None:
+            token = "..."
+        # if base_url is ...:
+        #    base_url = self.DEFAULT_ENDPOINT
+
         ApiClass = [
             cls
             for cls in self.__class__.mro()
@@ -144,8 +178,10 @@ class AuthApiMixin:
         ][0]
         is_async = ApiClass.__name__ == "AsyncApi"
         AuthenticatedClient = importlib.import_module("..client", ApiClass.__module__).AuthenticatedClient
-        base_client = AuthenticatedClient(
-            base_url=base_url, cookies=cookies, headers=headers, timeout=timeout, verify_ssl=verify_ssl, token="..."
-        )
-        auth = SerproAuth(base_client=base_client, consumer_key=consumer_key, consumer_secret=consumer_secret)
-        ApiClass.__init__(self, client=auth.client_async if is_async else auth.client)
+
+        client = AuthenticatedClient(base_url=base_url, token=token, **kwargs)
+        if consumer_key is not None:
+            auth = SerproAuth(base_client=client, consumer_key=consumer_key, consumer_secret=consumer_secret)
+            client = auth.client_async if is_async else auth.client
+
+        self._client = client

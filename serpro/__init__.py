@@ -1,19 +1,45 @@
+from functools import cached_property
+
 from serpro import consulta_cpf, datavalid
 
 from .auth import AuthApiMixin
 
 
-class DatavalidApi(AuthApiMixin, datavalid.Api):
-    ...
+# Consulta CPF
+class ConsultaCpf:
+    """
+    Client para a API de consulta de CPF
+
+    Documentação: https://apicenter.estaleiro.serpro.gov.br/documentacao/consulta-cpf
+    Descriptor OpenAPI: https://apidocs.datavalidp.estaleiro.serpro.gov.br/api-doc/
+    """
+
+    PROD_ENDPOINT = "https://gateway.apiserpro.serpro.gov.br/consulta-cpf-df/v1"
+    TEST_ENDPOINT = "https://gateway.apiserpro.serpro.gov.br/consulta-cpf-df-trial/v1"
+    TEST_TOKEN = "06aef429-a981-3ec5-a1f8-71d38d86481e"
+
+    class Sync(AuthApiMixin, consulta_cpf.Api):
+        ...
+
+    class Async(AuthApiMixin, consulta_cpf.AsyncApi):
+        ...
 
 
-class DatavalidAsyncApi(AuthApiMixin, datavalid.AsyncApi):
-    ...
+# Datavalid
+class Datavalid:
+    """
+    Client para a API de validação de dados cadastrais Datavalid
 
+    Documentação: https://apidocs.datavalidp.estaleiro.serpro.gov.br/
+    Descriptor OpenAPI: https://apicenter.estaleiro.serpro.gov.br/documentacao/dist/swaggers/consulta-cpf-df.yaml
+    """
 
-class ConsultaCpfApi(AuthApiMixin, consulta_cpf.Api):
-    ...
+    PROD_ENDPOINT = "https://gateway.apiserpro.serpro.gov.br/datavalid"
+    TEST_ENDPOINT = "https://gateway.apiserpro.serpro.gov.br/datavalid-demonstracao"
+    TEST_TOKEN = "06aef429-a981-3ec5-a1f8-71d38d86481e"
 
+    class Sync(AuthApiMixin, datavalid.Api):
+        ...
 
-class ConsultaCpfAsyncApi(AuthApiMixin, consulta_cpf.AsyncApi):
-    ...
+    class Async(AuthApiMixin, datavalid.AsyncApi):
+        ...
