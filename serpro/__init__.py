@@ -1,5 +1,3 @@
-from functools import cached_property
-
 from serpro import consulta_cpf, datavalid
 
 from .auth import AuthApiMixin
@@ -18,7 +16,7 @@ class ConsultaCpf:
     TEST_ENDPOINT = "https://gateway.apiserpro.serpro.gov.br/consulta-cpf-df-trial/v1"
     TEST_TOKEN = "06aef429-a981-3ec5-a1f8-71d38d86481e"
 
-    class Sync(AuthApiMixin, consulta_cpf.Api):
+    class Sync(AuthApiMixin, consulta_cpf.SyncApi):
         ...
 
     class Async(AuthApiMixin, consulta_cpf.AsyncApi):
@@ -38,7 +36,7 @@ class Datavalid:
     TEST_ENDPOINT = "https://gateway.apiserpro.serpro.gov.br/datavalid-demonstracao"
     TEST_TOKEN = "06aef429-a981-3ec5-a1f8-71d38d86481e"
 
-    class Sync(AuthApiMixin, datavalid.Api):
+    class Sync(AuthApiMixin, datavalid.SyncApi):
         ...
 
     class Async(AuthApiMixin, datavalid.AsyncApi):

@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "Serpro Client"
+name = "serpro"
 version = "0.1.0"
 description = "A client library for accessing Serpro APIs"
 

@@ -29,6 +29,7 @@ class Endpoints:
         client = self._client
         if callable(client):
             client = client()
+        assert isinstance(client, Client)
         return client
 
     def pf_basica_detailed(
@@ -633,9 +634,10 @@ class AsyncEndpoints:
     async def _get_client(self) -> Client:
         client = self._client
         if callable(client):
-            client = client()
+            client = client()  # type: ignore
         if isawaitable(client):
             client = await client
+        assert isinstance(client, Client)
         return client
 
     async def pf_basica_detailed(

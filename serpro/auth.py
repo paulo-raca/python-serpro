@@ -26,7 +26,7 @@ class ExpiringClient(Generic[AuthenticatedClient]):
         return timedelta(seconds=(self.expires_at_ns - perf_counter_ns()) * 10e-9)
 
     @property
-    def expires_at(self) -> timedelta:
+    def expires_at(self) -> datetime:
         return datetime.now() + self.expires_in
 
     def __bool__(self):
@@ -107,7 +107,7 @@ class SerproAuth(Generic[AuthenticatedClient]):
                     data={"grant_type": "client_credentials"},
                 )
                 if response.status_code != httpx.codes.OK:
-                    raise IOError(f"Failed to retrieve Bearer Token: {response.status_code} - {response.text()}")
+                    raise IOError(f"Failed to retrieve Bearer Token: {response.status_code} - {response.text}")
 
                 json = response.json()
                 expiring_client = ExpiringClient[AuthenticatedClient](
@@ -180,7 +180,7 @@ class AuthApiMixin:
         AuthenticatedClient = importlib.import_module("..client", ApiClass.__module__).AuthenticatedClient
 
         client = AuthenticatedClient(base_url=base_url, token=token, **kwargs)
-        if consumer_key is not None:
+        if consumer_key is not None and consumer_secret is not None:
             auth = SerproAuth(base_client=client, consumer_key=consumer_key, consumer_secret=consumer_secret)
             client = auth.client_async if is_async else auth.client
 
